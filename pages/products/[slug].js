@@ -1,30 +1,25 @@
-// TODO: Basically the entire file.
-import Head from 'next/head'
-import getSingleProduct from '../../hooks/getSingleProduct'
-import { ReactQueryDevtools } from 'react-query-devtools'
 import { useRouter } from 'next/router'
+import getSingleProduct from '../../hooks/getSingleProduct'
 import parse from 'html-react-parser'
 
-export default function Page() {
-  const router = useRouter()
-  const singleProduct = getSingleProduct(router.query.slug)
-
-  return <div>
-    <h1>TeachMeAutomation{singleProduct.isFetching ? <small>...</small> : null }</h1>
-    { singleProduct.isLoading ? (
-      <span>Loading...</span>
-    ) : singleProduct.isError ? (
-      singleProduct.error.message
-    ) : (
-      <div>
-        <div className="singleProduct" key={singleProduct.data.id}>
-          <h1>{singleProduct.data.title}</h1>
-          <div className="singleProductDescription">
-            {parse(singleProduct.data.description)}
-          </div>
+const Product = ({title, description}) => {
+  return (
+    <div>
+      <div className="singleProduct">
+        <h1>{title}</h1>
+        <div className="singleProductDescription">
+          {parse(description)}
         </div>
       </div>
-    )}
-  </div>,
-  <ReactQueryDevtools initialIsOpen={false} />
+    </div>
+  )
 }
+
+Product.getInitialProps = async ({ query }) => {
+  const res = await fetch(`http://localhost:3000/api/products/${query.slug}`);
+  const productData = res.json();
+
+  return productData;
+}
+
+export default Product;
